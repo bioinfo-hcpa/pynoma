@@ -1,4 +1,4 @@
-inRegionQuery = """query VariantInRegion($chrom: String!, $start: Int!, $stop: Int!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!) {
+in_region = """query VariantInRegion($chrom: String!, $start: Int!, $stop: Int!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!) {
   region(start: $start, stop: $stop, chrom: $chrom, reference_genome: $referenceGenome) {
     clinvar_variants {
       clinical_significance
@@ -56,7 +56,7 @@ inRegionQuery = """query VariantInRegion($chrom: String!, $start: Int!, $stop: I
   }
 }"""
     
-regionCoverageQuery = """query RegionCoverage($chrom: String!, $start: Int!, $stop: Int!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!, $includeExomeCoverage: Boolean!, $includeGenomeCoverage: Boolean!) {
+region_coverage = """query RegionCoverage($chrom: String!, $start: Int!, $stop: Int!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!, $includeExomeCoverage: Boolean!, $includeGenomeCoverage: Boolean!) {
   region(chrom: $chrom, start: $start, stop: $stop, reference_genome: $referenceGenome) {
     exome_coverage(dataset: $datasetId) @include(if: $includeExomeCoverage) {
       pos
@@ -89,7 +89,7 @@ regionCoverageQuery = """query RegionCoverage($chrom: String!, $start: Int!, $st
   }
 }"""
     
-fetchRegionQuery = """query FetchRegion($chrom: String!, $start: Int!, $stop: Int!, $referenceGenome: ReferenceGenomeId!) {
+fetch_region = """query FetchRegion($chrom: String!, $start: Int!, $stop: Int!, $referenceGenome: ReferenceGenomeId!) {
     region(chrom: $chrom, start: $start, stop: $stop, reference_genome: $referenceGenome) {
       reference_genome
       chrom
