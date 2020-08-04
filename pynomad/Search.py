@@ -13,17 +13,24 @@ class Search:
 
 class RegionSearch(Search):
 
-    def __init__(self):
+    def __init__(self, chromosome, start_position, end_position):
         Search.__init__(self)
+        self.chromosome = str(chromosome)
+        self.start = str(start_position)
+        self.end = str(end_position)
 
 
 class VariantSearch(Search):
 
-    def __init__(self):
+    # variant_id: chromosome-position-original_nucleotide-variant
+    #    example: 4-1002747-G-A 
+    def __init__(self, variant_id: str):
         Search.__init__(self)
+        self.variant_id = variant_id
 
 
 class GeneSearch(Search):
 
-    def __init__(self):
+    def __init__(self, gene: str):
         Search.__init__(self)
+        self.gene = gene
