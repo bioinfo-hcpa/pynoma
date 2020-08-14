@@ -20,9 +20,9 @@ class DataManager:
 
     @classmethod
     def get_standard_dataframe(self, received_json):
-        raw_df, _ = DataManager.process_raw_json(received_json)
+        raw_df, clinical_df = DataManager.process_raw_json(received_json)
         standard_df = DataManager.process_raw_df(raw_df)
-        return standard_df
+        return standard_df, clinical_df
 
 
     @classmethod

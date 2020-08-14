@@ -46,11 +46,24 @@ class RegionSearch(Search):
         return self.request_gnomad(variables)
 
 
-    def get_dataframe(self, standard=True, additional_population_info=False):
+    def get_dataframe(self, standard=True, additional_population_info=False, clinical_dataframe=False):
 
-        json = self.get_json
-        DataManager.process_raw_json(json)
-        return
+        json_data = self.get_json()
+        df = None
+        clinical_df = None 
+
+        if standard:
+            df, clinical_df = DataManager.get_standard_dataframe(json_data)
+        else:
+            df, clinical_df = DataManager.get_raw_dataframes(json_data)
+        
+        if additional_population_info:
+            df = df #TO-DO!!!
+
+        if clinical_dataframe:
+            return df, clinical_df
+        else:
+            return df
 
 
 class VariantSearch(Search):
