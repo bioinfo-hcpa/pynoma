@@ -55,6 +55,15 @@ in_region = """query VariantInRegion($chrom: String!, $start: Int!, $stop: Int!,
     }
   }
 }"""
+
+in_region_variables = """
+            {
+                "chrom":"%s",
+                "datasetId":"%s",
+                "referenceGenome":"GRCh38",
+                "start":%s,
+                "stop":%s
+            }"""
     
 region_coverage = """query RegionCoverage($chrom: String!, $start: Int!, $stop: Int!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!, $includeExomeCoverage: Boolean!, $includeGenomeCoverage: Boolean!) {
   region(chrom: $chrom, start: $start, stop: $stop, reference_genome: $referenceGenome) {
