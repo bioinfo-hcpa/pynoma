@@ -1,4 +1,20 @@
 import pandas as pd
+from copy import deepcopy
+
+
+POPULATION_ID_MAP = {
+            'AFR': 'African',
+            'AMI': 'Amish',
+            'AMR': 'Latino',
+            'ASJ': 'Ashkenazi Jewish',
+            'EAS': 'East Asian',
+            'FIN': 'European (Finnish)',
+            'NFE': 'European (non-Finnish)',
+            'OTH': 'Other',
+            'SAS': 'South Asian'
+        }
+
+
 
 class DataManager:
 
@@ -23,8 +39,40 @@ class DataManager:
         return
 
     
-    def process_additional_pop_info(self):
-        return
+    # dataframe_type: either 'standard' or 'raw' (it is not binary because 
+    # maybe more output dataframe types will be added in the future)
+    def get_additional_pop_info_df(self, dataframe_type:str):
+
+        populations_freq_column = self._process_populations_frequency()
+        if dataframe_type == 'standard':
+            return self._add_populations_freq_column(populations_freq_column, self.standard_df)
+        elif dataframe_type == 'raw':
+            return self._add_populations_freq_column(populations_freq_column, self.raw_df)
+        else:
+            raise("Dataframe type should be either 'raw' or 'standard'")
+
+
+    
+    def _process_populations_frequency(self):
+        
+        populations_freq_column = {}
+        for pop_id in POPULATION_ID_MAP:
+            populations_freq_column[pop_id] = []
+    
+        for variant in self.raw_df['genome']:
+            for population in variant['populations']:
+                pop_id = population['id']
+                pop_allele_freq = population['ac'] / population['an']
+                populations_freq_column[pop_id].append("{:e}".format(pop_allele_freq))
+
+        return populations_freq_column
+
+
+    def _add_populations_freq_column(self, populations_freq_column, df):
+        df_copy = deepcopy(df)
+        for pop_id, pop_freqs in populations_freq_column.items():
+            df_copy[POPULATION_ID_MAP[pop_id]] = pop_freqs
+        return df_copy
 
 
     def _process_raw_df(self):

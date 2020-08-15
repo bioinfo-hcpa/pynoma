@@ -56,15 +56,16 @@ class RegionSearch(Search):
 
         json_data = self.get_json()
         self.dm = DataManager(json_data)
-
-        if additional_population_info:
-            self.dm.process_additional_pop_info()
         
         if standard:
             self.dm.process_standard_dataframe()
+            if additional_population_info:
+                return self.dm.get_additional_pop_info_df('standard'), self.dm.clinical_df
             return self.dm.standard_df, self.dm.clinical_df
         
         else:
+            if additional_population_info:
+                return self.dm.get_additional_pop_info_df('raw'), self.dm.clinical_df
             return self.dm.raw_df, self.dm.clinical_df
 
 
