@@ -2,31 +2,32 @@ import pandas as pd
 
 class DataManager:
 
-    def __init__(self):
-        self.something = 1
+    def __init__(self, json_data):
+        self.json_data = json_data
+        self.raw_df = None
+        self.clinical_df = None
+        self.standard_df = None
+        self._process_raw_json()
 
 
-    @classmethod
-    def process_raw_json(self, received_json):
-        clinical_var = received_json['data']['region']['clinvar_variants']
-        variants = received_json['data']['region']['variants']
-        return pd.DataFrame(variants), pd.DataFrame(clinical_var)
+    def _process_raw_json(self):
+        clinical_var = self.json_data['data']['region']['clinvar_variants']
+        variants = self.json_data['data']['region']['variants']
+        self.raw_df = pd.DataFrame(variants)
+        self.clinical_df = pd.DataFrame(clinical_var)
+        return
+
+    
+    def process_standard_dataframe(self):
+        self._process_raw_df()
+        return
+
+    
+    def process_additional_pop_info(self):
+        return
 
 
-    @classmethod
-    def get_raw_dataframes(self, received_json):
-        return DataManager.process_raw_json(received_json)
-
-
-    @classmethod
-    def get_standard_dataframe(self, received_json):
-        raw_df, clinical_df = DataManager.process_raw_json(received_json)
-        standard_df = DataManager.process_raw_df(raw_df)
-        return standard_df, clinical_df
-
-
-    @classmethod
-    def process_raw_df(self, raw_df):
+    def _process_raw_df(self):
 
         renamed_cols = {
                             'variant_id': 'Variant ID',
@@ -43,13 +44,13 @@ class DataManager:
                     'Number of Homozygotes'
                 ]
 
-        df_renamed = raw_df.rename(columns=renamed_cols)
-        df_final = DataManager.explicit_allele_informations(df_renamed)
-        return df_final.loc[:, standard_cols]
+        df_renamed = self.raw_df.rename(columns=renamed_cols)
+        df_final = self._explicit_allele_informations(df_renamed)
+        self.standard_df = df_final.loc[:, standard_cols]
+        return
         
 
-    @classmethod
-    def explicit_allele_informations(self, df):
+    def _explicit_allele_informations(self, df):
 
         allele_count = []
         allele_number = []
@@ -63,7 +64,7 @@ class DataManager:
             
             n_homs = 0
             for population in variant['populations']:
-                n_hom += population['ac_hom']
+                n_homs += population['ac_hom']
             
             num_homozygotes.append(n_homs)
             

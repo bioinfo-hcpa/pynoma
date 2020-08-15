@@ -8,8 +8,10 @@ class Search:
         self.query = query
         self.query_vars = query_variables
 
+        self.dm = None   # attribute holding DataManager object
+
     
-    # variables is a tuple (var1, var2, ..., varn)
+    # variables: a tuple (var1, var2, ..., varn)
     def request_gnomad(self, variables):
         variables = self.query_vars % variables
         response = post(self.end_point, data={'query': self.query, 'variables': variables}, timeout=None)
@@ -31,7 +33,7 @@ class RegionSearch(Search):
     # dataset_version: either 3 or 2
     def __init__(self, dataset_version:int, chromosome, start_position, end_position):
 
-        from Queries import in_region, in_region_variables
+        from pynomad.Queries import in_region, in_region_variables
         super().__init__(self, in_region, in_region_variables)
 
         self.chromosome = str(chromosome)
@@ -46,24 +48,25 @@ class RegionSearch(Search):
         return self.request_gnomad(variables)
 
 
-    def get_dataframe(self, standard=True, additional_population_info=False, clinical_dataframe=False):
+    # If standard is set to False, it will return everything without processing 
+    # farther than {json to pandas DF}
+    # If additional_population_info is set to True, 9 additional columns will 
+    # be added to the returned dataframe (the 9 population allele frequency for each variant)
+    def get_data(self, standard=True, additional_population_info=False):
 
         json_data = self.get_json()
-        df = None
-        clinical_df = None 
+        self.dm = DataManager(json_data)
 
-        if standard:
-            df, clinical_df = DataManager.get_standard_dataframe(json_data)
-        else:
-            df, clinical_df = DataManager.get_raw_dataframes(json_data)
-        
         if additional_population_info:
-            df = df #TO-DO!!!
-
-        if clinical_dataframe:
-            return df, clinical_df
+            self.dm.process_additional_pop_info()
+        
+        if standard:
+            self.dm.process_standard_dataframe()
+            return self.dm.standard_df, self.dm.clinical_df
+        
         else:
-            return df
+            return self.dm.raw_df, self.dm.clinical_df
+
 
 
 class VariantSearch(Search):
