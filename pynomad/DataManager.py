@@ -95,6 +95,7 @@ class DataManager:
         df_renamed = self.raw_df.rename(columns=renamed_cols)
         df_final = self._explicit_allele_informations(df_renamed)
         self.standard_df = df_final.loc[:, standard_cols]
+        self._add_variant_columns()
         return
         
 
@@ -108,7 +109,8 @@ class DataManager:
         for variant in df['genome']:
             allele_count.append(variant['ac'])
             allele_number.append(variant['an'])
-            allele_freq.append("{:e}".format(variant['af']))
+            #allele_freq.append("{:e}".format(variant['af']))
+            allele_freq.append(variant['af'])
             
             n_homs = 0
             for population in variant['populations']:
@@ -123,3 +125,23 @@ class DataManager:
         return df
 
 
+    def _add_variant_columns(self):
+
+        chromosome_col = []
+        location_col = []
+        gen_reference_col = []
+        gen_alternative_col = []
+
+        for variant in self.standard_df['Variant ID']:
+            info_pieces = variant.split('-')
+            chromosome_col.append(info_pieces[0])
+            location_col.append(info_pieces[1])
+            gen_reference_col.append(info_pieces[2])
+            gen_alternative_col.append(info_pieces[3])
+
+        self.standard_df['Chromosome'] = chromosome_col
+        self.standard_df['Location'] = location_col
+        self.standard_df['Reference'] = gen_reference_col
+        self.standard_df['Alternative'] = gen_alternative_col
+        return
+        
