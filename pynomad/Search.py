@@ -70,15 +70,6 @@ class RegionSearch(Search):
 
 
 
-class VariantSearch(Search):
-
-    # variant_id: chromosome-position-original_nucleotide-variant
-    #    example: 4-1002747-G-A 
-    def __init__(self, variant_id: str):
-        super().__init__(self, "", "")
-        self.variant_id = variant_id
-
-
 
 class GeneSearch(Search):
 
@@ -123,3 +114,19 @@ class GeneSearch(Search):
         dataframes = self.region_search.get_data(standard, additional_population_info)
         self.dm = self.region_search.dm
         return dataframes
+
+
+
+class VariantSearch(Search):
+
+    # variant_id: chromosome-position-original_nucleotide-variant
+    #    example: 4-1002747-G-A 
+    def __init__(self, dataset_version:int, variant_id: str):
+        from pynomad.Queries import variant_search, variant_search_variables
+        super().__init__(dataset_version, variant_search, variant_search_variables)
+        self.variant_id = variant_id
+
+
+    def get_json(self):
+        variables = (self.dataset_id, self.variant_id)
+        return self.request_gnomad(variables)
