@@ -117,3 +117,18 @@ fetch_region = """query FetchRegion($chrom: String!, $start: Int!, $stop: Int!, 
       }
     }
   }"""
+
+
+
+gene_id = """query Search($dataset: DatasetId!, $query: String!) {
+    searchResults(dataset: $dataset, query: $query) {
+      label
+      value: url
+    }
+  }"""
+
+
+gene_id_variables = """{
+  "dataset": "%s",
+  "query": "%s"
+}"""

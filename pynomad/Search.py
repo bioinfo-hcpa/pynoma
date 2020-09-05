@@ -3,10 +3,12 @@ from pynomad.DataManager import DataManager
 
 class Search:
 
-    def __init__(self, dataset_id, query, query_variables):
+    # dataset_version: either 3 or 2
+    def __init__(self, dataset_version:int, query, query_variables):
         self.end_point = "https://gnomad.broadinstitute.org/api/"
         self.query = query
         self.query_vars = query_variables
+        self.dataset_id = self.get_dataset_id(dataset_version)
 
         self.dm = None   # attribute holding DataManager object
 
@@ -22,9 +24,9 @@ class Search:
         if version == 3:
             return 'gnomad_r3'
         elif version == 2:
-            return 'gnomad_r2'
+            return 'gnomad_r2_1'
         else:
-            raise('Invalid dataset version. Choose either 2 or 3.')
+            raise Exception('Invalid dataset version. Choose either 2 or 3.')
         return
 
 
@@ -34,13 +36,11 @@ class RegionSearch(Search):
     def __init__(self, dataset_version:int, chromosome, start_position, end_position):
 
         from pynomad.Queries import in_region, in_region_variables
-        super().__init__(self, in_region, in_region_variables)
+        super().__init__(dataset_version, in_region, in_region_variables)
 
         self.chromosome = str(chromosome)
         self.start = str(start_position)
         self.end = str(end_position)
-        
-        self.dataset_id = super().get_dataset_id(dataset_version)
 
 
     def get_json(self):
@@ -81,6 +81,29 @@ class VariantSearch(Search):
 
 class GeneSearch(Search):
 
-    def __init__(self, gene: str):
-        super().__init__(self, "", "")
+    def __init__(self, dataset_version:int, gene: str):
+
+        from pynomad.Queries import gene_id, gene_id_variables
+        super().__init__(dataset_version, gene_id, gene_id_variables)
+        
         self.gene = gene
+        self.gene_ens_id = None
+
+        self.get_ensembl_id(gene_id_variables)
+
+
+    def get_ensembl_id(self, query_variables):
+        json_data = self.request_gnomad((self.dataset_id, self.gene))
+        str_ensg = json_data['data']['searchResults'][0]['value']
+        self.gene_ens_id = str_ensg.split('/')[-1].split('?')[0]
+        return
+
+    
+
+
+        
+    """
+    def get_json(self):
+        variables = (self.datase, self.dataset_id, self.start, self.end)
+        return self.request_gnomad(variables)
+    """
