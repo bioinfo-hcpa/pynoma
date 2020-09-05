@@ -79,6 +79,7 @@ class VariantSearch(Search):
         self.variant_id = variant_id
 
 
+
 class GeneSearch(Search):
 
     def __init__(self, dataset_version:int, gene: str):
@@ -88,8 +89,19 @@ class GeneSearch(Search):
         
         self.gene = gene
         self.gene_ens_id = None
-
         self.get_ensembl_id(gene_id_variables)
+
+        from pynomad.Queries import gene_search, gene_search_variables
+        self.query = gene_search
+        self.query_vars = gene_search_variables
+        
+        self.chromosome = None
+        self.start = None
+        self.end = None
+        self.get_gene_information()
+
+        self.region_search = RegionSearch(dataset_version, self.chromosome, 
+                                            self.start, self.end)
 
 
     def get_ensembl_id(self, query_variables):
@@ -98,12 +110,16 @@ class GeneSearch(Search):
         self.gene_ens_id = str_ensg.split('/')[-1].split('?')[0]
         return
 
-    
+
+    def get_gene_information(self):
+        gene_info = self.request_gnomad(self.gene_ens_id)
+        self.chromosome = gene_info['data']['gene']['chrom']
+        self.start = gene_info['data']['gene']['start']
+        self.end = gene_info['data']['gene']['stop']
+        return
 
 
-        
-    """
-    def get_json(self):
-        variables = (self.datase, self.dataset_id, self.start, self.end)
-        return self.request_gnomad(variables)
-    """
+    def get_data(self, standard=True, additional_population_info=False):
+        dataframes = self.region_search.get_data(standard, additional_population_info)
+        self.dm = self.region_search.dm
+        return dataframes
