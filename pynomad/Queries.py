@@ -485,20 +485,8 @@ variant_search = """query GnomadVariant($variantId: String, $rsid: String, $data
           }
         }
         siteQualityMetrics {
-          BaseQRankSum
-          ClippingRankSum
-          DP
-          FS
-          InbreedingCoeff
-          MQ
-          MQRankSum
-          pab_max
-          QD
-          ReadPosRankSum
-          RF
-          SiteQuality
-          SOR
-          VQSLOD
+          metric
+          value
         }
       }
     }
@@ -571,20 +559,8 @@ variant_search = """query GnomadVariant($variantId: String, $rsid: String, $data
           }
         }
         siteQualityMetrics {
-          BaseQRankSum
-          ClippingRankSum
-          DP
-          FS
-          InbreedingCoeff
-          MQ
-          MQRankSum
-          pab_max
-          QD
-          ReadPosRankSum
-          RF
-          SiteQuality
-          SOR
-          VQSLOD
+          metric
+          value
         }
       }
     }
