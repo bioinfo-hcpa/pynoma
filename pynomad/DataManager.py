@@ -18,19 +18,26 @@ POPULATION_ID_MAP = {
 
 class DataManager:
 
-    def __init__(self, json_data):
+    def __init__(self, json_data, variant_search=False):
         self.json_data = json_data
+        self.variant_search = variant_search
+
         self.raw_df = None
         self.clinical_df = None
         self.standard_df = None
+        self.variant_metadata = None  # Used in variant searches
         self._process_raw_json()
 
 
     def _process_raw_json(self):
-        clinical_var = self.json_data['data']['region']['clinvar_variants']
-        variants = self.json_data['data']['region']['variants']
-        self.raw_df = pd.DataFrame(variants)
-        self.clinical_df = pd.DataFrame(clinical_var)
+        if self.variant_search:
+            self.__process_variant_search_data()
+        
+        else:
+            clinical_var = self.json_data['data']['region']['clinvar_variants']
+            variants = self.json_data['data']['region']['variants']
+            self.raw_df = pd.DataFrame(variants)
+            self.clinical_df = pd.DataFrame(clinical_var)
         return
 
     
@@ -144,4 +151,55 @@ class DataManager:
         self.standard_df['Reference'] = gen_reference_col
         self.standard_df['Alternative'] = gen_alternative_col
         return
+    
+
+    def __process_variant_search_data(self):
+        self.__build_variant_search_standard_df()
+        self.__extract_variant_metadata()
+        return
+    
+
+    def __build_variant_search_standard_df(self):
         
+        reqdf = pd.json_normalize(self.json_data['data']['variant']['genome']['populations']).set_index('id')
+        POPULATION_ID_MAP['FEMALE'] = 'Female'
+        POPULATION_ID_MAP['MALE'] = 'Male'
+
+        new_index = {}
+        frequencies = []
+        for row in reqdf.iterrows():
+            row_id = row[0]
+            new_row_name = ""
+            for piece in row_id.split('_'):
+                new_row_name += POPULATION_ID_MAP[piece] + " "
+            new_row_name = new_row_name[0:-1]
+            new_index[row_id] = new_row_name
+            frequencies.append(row[1]['ac']/row[1]['an'])
+
+        new_index['FEMALE'] = 'Total Female'
+        new_index['MALE'] = 'Total Male'
+        new_columns = {'ac': 'Allele Count', 'an': 'Allele Number',
+                    'ac_hemi': 'Number of Hemizygotes', 'ac_hom': 'Number of Homozygotes'}
+
+        df = reqdf.rename(columns=new_columns, index=new_index)
+
+        total_row = df.loc['Total Female'] + df.loc['Total Male']
+        total_row.name = 'Total'
+        df = df.append([total_row])
+
+        frequencies.append(df.loc['Total']['Allele Count'] / df.loc['Total']['Allele Number'])
+        df['Allele Frequency'] = frequencies
+        
+        chromosome = self.json_data['data']['variant']['chrom']
+        if chromosome != 'X' and chromosome != 'Y':
+            del df['Number of Hemizygotes']
+
+        self.standard_df = df
+        return
+
+
+    def __extract_variant_metadata(self):
+        metadata = deepcopy(self.json_data)
+        metadata['data']['variant']['genome'].pop('populations')
+        self.variant_metadata = metadata['data']['variant']
+        return

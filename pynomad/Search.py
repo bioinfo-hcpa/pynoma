@@ -130,3 +130,12 @@ class VariantSearch(Search):
     def get_json(self):
         variables = (self.dataset_id, self.variant_id)
         return self.request_gnomad(variables)
+
+
+    def get_data(self, raw=False):
+        json_data = self.get_json()
+        if raw:
+            return json_data
+        else:
+            self.dm = DataManager(json_data, variant_search=True)
+            return self.dm.standard_df, self.dm.variant_metadata
