@@ -1,4 +1,4 @@
-in_region = """query VariantInRegion($chrom: String!, $start: Int!, $stop: Int!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!) {
+in_region_v3 = """query VariantInRegion($chrom: String!, $start: Int!, $stop: Int!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!) {
   region(start: $start, stop: $stop, chrom: $chrom, reference_genome: $referenceGenome) {
     clinvar_variants {
       clinical_significance
@@ -56,11 +56,70 @@ in_region = """query VariantInRegion($chrom: String!, $start: Int!, $stop: Int!,
   }
 }"""
 
+in_region_v2 = """query VariantInRegion($chrom: String!, $start: Int!, $stop: Int!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!) {
+  region(start: $start, stop: $stop, chrom: $chrom, reference_genome: $referenceGenome) {
+    clinvar_variants {
+      clinical_significance
+      clinvar_variation_id
+      gold_stars
+      major_consequence
+      pos
+      variant_id
+    }
+    variants(dataset: $datasetId) {
+      consequence
+      flags
+      gene_id
+      gene_symbol
+      hgvs
+      hgvsc
+      hgvsp
+      lof
+      lof_filter
+      lof_flags
+      pos
+      rsid
+      variant_id: variantId
+      exome {
+        ac
+        ac_hemi
+        ac_hom
+        an
+        af
+        filters
+        populations {
+          id
+          ac
+          an
+          ac_hemi
+          ac_hom
+        }
+      }
+      genome {
+        ac
+        ac_hemi
+        ac_hom
+        an
+        af
+        filters
+        populations {
+          id
+          ac
+          an
+          ac_hemi
+          ac_hom
+        }
+      }
+    }
+  }
+}
+"""
+
 in_region_variables = """
             {
                 "chrom":"%s",
                 "datasetId":"%s",
-                "referenceGenome":"GRCh38",
+                "referenceGenome":"%s",
                 "start":%s,
                 "stop":%s
             }"""

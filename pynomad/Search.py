@@ -8,7 +8,9 @@ class Search:
         self.end_point = "https://gnomad.broadinstitute.org/api/"
         self.query = query
         self.query_vars = query_variables
+        self.reference_genome = None
         self.dataset_id = self.get_dataset_id(dataset_version)
+        
 
         self.dm = None   # attribute holding DataManager object
 
@@ -22,9 +24,11 @@ class Search:
     
     def get_dataset_id(self, version):
         if version == 3:
-            return 'gnomad_r3'
+            self.reference_genome = "GRCh38"
+            return "gnomad_r3"
         elif version == 2:
-            return 'gnomad_r2_1'
+            self.reference_genome = "GRCh37"
+            return "gnomad_r2_1"
         else:
             raise Exception('Invalid dataset version. Choose either 2 or 3.')
         return
@@ -35,7 +39,11 @@ class RegionSearch(Search):
     # dataset_version: either 3 or 2
     def __init__(self, dataset_version:int, chromosome, start_position, end_position):
 
-        from pynomad.Queries import in_region, in_region_variables
+        from pynomad.Queries import in_region_v3, in_region_v2, in_region_variables
+        if dataset_version == 2:
+            in_region = in_region_v2
+        else:
+            in_region = in_region_v3
         super().__init__(dataset_version, in_region, in_region_variables)
 
         self.chromosome = str(chromosome)
@@ -44,7 +52,7 @@ class RegionSearch(Search):
 
 
     def get_json(self):
-        variables = (self.chromosome, self.dataset_id, self.start, self.end)
+        variables = (self.chromosome, self.dataset_id, self.reference_genome, self.start, self.end)
         return self.request_gnomad(variables)
 
 
@@ -55,8 +63,12 @@ class RegionSearch(Search):
     def get_data(self, standard=True, additional_population_info=False):
 
         json_data = self.get_json()
-        self.dm = DataManager(json_data)
-        
+        if not json_data['data']['region']['variants']:
+            print("No variants found.")
+            return (None, None)
+
+        self.dm = DataManager(json_data, self.dataset_id)
+
         if standard:
             self.dm.process_standard_dataframe()
             if additional_population_info:
@@ -80,7 +92,8 @@ class GeneSearch(Search):
         
         self.gene = gene
         self.gene_ens_id = None
-        self.get_ensembl_id(gene_id_variables)
+        if not self.get_ensembl_id(gene_id_variables):
+            return 
 
         from pynomad.Queries import gene_search, gene_search_variables
         self.query = gene_search
@@ -97,9 +110,13 @@ class GeneSearch(Search):
 
     def get_ensembl_id(self, query_variables):
         json_data = self.request_gnomad((self.dataset_id, self.gene))
+        if not json_data['data']['searchResults']:
+            print("No gene found with given name.")
+            return False
+        
         str_ensg = json_data['data']['searchResults'][0]['value']
         self.gene_ens_id = str_ensg.split('/')[-1].split('?')[0]
-        return
+        return True
 
 
     def get_gene_information(self):
@@ -111,6 +128,8 @@ class GeneSearch(Search):
 
 
     def get_data(self, standard=True, additional_population_info=False):
+        if not self.gene_ens_id:
+            return (None, None)
         dataframes = self.region_search.get_data(standard, additional_population_info)
         self.dm = self.region_search.dm
         return dataframes
@@ -134,8 +153,12 @@ class VariantSearch(Search):
 
     def get_data(self, raw=False):
         json_data = self.get_json()
+        if not json_data['data']['variant']:
+            print("Variant not found.")
+            return (None, None)
+
         if raw:
             return json_data
         else:
-            self.dm = DataManager(json_data, variant_search=True)
+            self.dm = DataManager(json_data, self.dataset_id, variant_search=True)
             return self.dm.standard_df, self.dm.variant_metadata

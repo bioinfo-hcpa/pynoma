@@ -11,16 +11,33 @@ POPULATION_ID_MAP = {
             'FIN': 'European (Finnish)',
             'NFE': 'European (non-Finnish)',
             'OTH': 'Other',
-            'SAS': 'South Asian'
+            'SAS': 'South Asian',
+        }
+
+SUBPOPULATION_ID_MAP = {
+            'FEMALE': 'Female',
+            'MALE': 'Male',
+
+            'JPN': 'Japanese',
+            'KOR': 'Korean',
+            'OEA': 'Other',
+
+            'BGR': 'Bulgarian',
+            'EST': 'Estonian',
+            'NWE': 'North-western',
+            'SEU': 'Southern',
+            'SWE': 'Swedish',
+            'ONF': 'Other'
         }
 
 
 
 class DataManager:
 
-    def __init__(self, json_data, variant_search=False):
+    def __init__(self, json_data, gnomad_version:str, variant_search=False):
         self.json_data = json_data
         self.variant_search = variant_search
+        self.gnomad_version = gnomad_version 
 
         self.raw_df = None
         self.clinical_df = None
@@ -39,6 +56,7 @@ class DataManager:
             self.raw_df = pd.DataFrame(variants)
             self.clinical_df = pd.DataFrame(clinical_var)
         return
+
 
     
     def process_standard_dataframe(self):
@@ -99,36 +117,71 @@ class DataManager:
                     'Number of Homozygotes'
                 ]
 
+        
+
         df_renamed = self.raw_df.rename(columns=renamed_cols)
-        df_final = self._explicit_allele_informations(df_renamed)
+        df_final = self._explicit_allele_informations(df_renamed, standard_cols)
         self.standard_df = df_final.loc[:, standard_cols]
         self._add_variant_columns()
         return
         
+    
 
-    def _explicit_allele_informations(self, df):
-
+    def _explicit_allele_informations(self, df, standard_cols):
+        chromosome = df['Variant ID'][0][0]
         allele_count = []
         allele_number = []
         allele_freq = []
         num_homozygotes = []
+        num_hemizygotes = []
+        region = []
 
         for variant in df['genome']:
-            allele_count.append(variant['ac'])
-            allele_number.append(variant['an'])
-            #allele_freq.append("{:e}".format(variant['af']))
-            allele_freq.append(variant['af'])
+            if variant:
+                allele_count.append(variant['ac'])
+                allele_number.append(variant['an'])
+                allele_freq.append(variant['af'])
+                
+                n_homs = 0
+                n_hemi = 0
+                for population in variant['populations']:
+                    n_homs += population['ac_hom']
+                    n_hemi += population['ac_hemi']
+                
+                num_homozygotes.append(n_homs)
+                num_hemizygotes.append(n_hemi)
+                region.append('Genome')
             
-            n_homs = 0
-            for population in variant['populations']:
-                n_homs += population['ac_hom']
-            
-            num_homozygotes.append(n_homs)
-            
+            else:
+                region.append('Exome')
+
+        if self.gnomad_version == 'gnomad_r2_1':
+            for variant in df['exome']:
+                if variant:
+                    allele_count.append(variant['ac'])
+                    allele_number.append(variant['an'])
+                    allele_freq.append(variant['af'])
+                
+                    n_homs = 0
+                    n_hemi = 0
+                    for population in variant['populations']:
+                        n_homs += population['ac_hom']
+                        n_hemi += population['ac_hemi']
+                    num_homozygotes.append(n_homs)
+                    num_hemizygotes.append(n_hemi)
+
+
         df['Allele Count'] = allele_count
         df['Allele Number'] = allele_number
         df['Allele Frequency'] = allele_freq
         df['Number of Homozygotes'] = num_homozygotes
+        if (chromosome == 'X') or (chromosome == 'Y'):
+            df['Number of Hemizygotes'] = num_hemizygotes
+            standard_cols.append('Number of Hemizygotes')
+        df['Region'] = region
+
+        if self.gnomad_version == 'gnomad_r2_1':
+            standard_cols.append('Region')
         return df
 
 
@@ -162,19 +215,23 @@ class DataManager:
     def __build_variant_search_standard_df(self):
         
         reqdf = pd.json_normalize(self.json_data['data']['variant']['genome']['populations']).set_index('id')
-        POPULATION_ID_MAP['FEMALE'] = 'Female'
-        POPULATION_ID_MAP['MALE'] = 'Male'
 
         new_index = {}
         frequencies = []
         for row in reqdf.iterrows():
             row_id = row[0]
             new_row_name = ""
+            
             for piece in row_id.split('_'):
-                new_row_name += POPULATION_ID_MAP[piece] + " "
+                try:
+                    new_row_name += POPULATION_ID_MAP[piece] + " "
+                except:
+                    new_row_name += SUBPOPULATION_ID_MAP[piece] + " "
+            
             new_row_name = new_row_name[0:-1]
             new_index[row_id] = new_row_name
             frequencies.append(row[1]['ac']/row[1]['an'])
+            
 
         new_index['FEMALE'] = 'Total Female'
         new_index['MALE'] = 'Total Male'
