@@ -1,13 +1,13 @@
 from distutils.core import setup
 setup(
-  name = 'pynomad',         
-  packages = ['pynomad'],  
+  name = 'pynoma',         
+  packages = ['pynoma'],  
   version = '0.0.1',
   license='GNU General Public License v3.0',
   description = 'A Python API to communicate with gnomAD database.',   
-  author = 'Felipe Colombelli',                   
-  author_email = 'fcolombelli@inf.ufrgs.br',
-  url = 'https://github.com/bioinfo-hcpa/pynomad',
+  author = 'Felipe Colombelli, Paola Barcelos Carneiro',                   
+  author_email = 'fcolombelli@inf.ufrgs.br, pa0labarcellosca@gmail.com',
+  url = 'https://github.com/bioinfo-hcpa/pynoma',
   keywords = ['gnomad', 'api', 'variants', 'genes'],
   install_requires=[
           'pandas>=1.0.5',

@@ -1,5 +1,5 @@
 from requests import post
-from pynomad.DataManager import DataManager
+from pynoma.DataManager import DataManager
 
 class Search:
 
@@ -39,7 +39,7 @@ class RegionSearch(Search):
     # dataset_version: either 3 or 2
     def __init__(self, dataset_version:int, chromosome, start_position, end_position):
 
-        from pynomad.Queries import in_region_v3, in_region_v2, in_region_variables
+        from pynoma.Queries import in_region_v3, in_region_v2, in_region_variables
         if dataset_version == 2:
             in_region = in_region_v2
         else:
@@ -87,7 +87,7 @@ class GeneSearch(Search):
 
     def __init__(self, dataset_version:int, gene: str):
 
-        from pynomad.Queries import gene_id, gene_id_variables
+        from pynoma.Queries import gene_id, gene_id_variables
         super().__init__(dataset_version, gene_id, gene_id_variables)
         
         self.gene = gene
@@ -95,7 +95,7 @@ class GeneSearch(Search):
         if not self.get_ensembl_id(gene_id_variables):
             return 
 
-        from pynomad.Queries import gene_search, gene_search_variables
+        from pynoma.Queries import gene_search, gene_search_variables
         self.query = gene_search
         self.query_vars = gene_search_variables
         
@@ -141,7 +141,7 @@ class VariantSearch(Search):
     # variant_id: chromosome-position-original_nucleotide-variant
     #    example: 4-1002747-G-A 
     def __init__(self, dataset_version:int, variant_id: str):
-        from pynomad.Queries import variant_search, variant_search_variables
+        from pynoma.Queries import variant_search, variant_search_variables
         super().__init__(dataset_version, variant_search, variant_search_variables)
         self.variant_id = variant_id
 
