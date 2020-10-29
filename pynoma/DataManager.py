@@ -178,10 +178,10 @@ class DataManager:
         if (chromosome == 'X') or (chromosome == 'Y'):
             df['Number of Hemizygotes'] = num_hemizygotes
             standard_cols.append('Number of Hemizygotes')
-        df['Region'] = region
+        df['Source'] = region
 
         if self.gnomad_version == 'gnomad_r2_1':
-            standard_cols.append('Region')
+            standard_cols.append('Source')
         return df
 
 
@@ -230,7 +230,11 @@ class DataManager:
             
             new_row_name = new_row_name[0:-1]
             new_index[row_id] = new_row_name
-            frequencies.append(row[1]['ac']/row[1]['an'])
+            
+            frequency = 0
+            if row[1]['an']:
+                frequency = row[1]['ac']/row[1]['an']
+            frequencies.append(frequency)
             
 
         new_index['FEMALE'] = 'Total Female'
@@ -244,8 +248,10 @@ class DataManager:
         total_row.name = 'Total'
         df = df.append([total_row])
 
+ 
         frequencies.append(df.loc['Total']['Allele Count'] / df.loc['Total']['Allele Number'])
         df['Allele Frequency'] = frequencies
+        df['Allele Frequency'] = df['Allele Frequency'].fillna(0)
         
         chromosome = self.json_data['data']['variant']['chrom']
         if chromosome != 'X' and chromosome != 'Y':
