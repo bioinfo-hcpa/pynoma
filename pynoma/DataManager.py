@@ -3,21 +3,23 @@ from copy import deepcopy
 
 
 POPULATION_ID_MAP = {
-            'afr': 'African',
-            'ami': 'Amish',
-            'amr': 'Latino',
-            'asj': 'Ashkenazi Jewish',
-            'eas': 'East Asian',
-            'fin': 'European (Finnish)',
-            'nfe': 'European (non-Finnish)',
-            'oth': 'Other',
-            'sas': 'South Asian',
-            'mid': 'Middle Eastern'
+            'AFR': 'African',
+            'AMI': 'Amish',
+            'AMR': 'Latino',
+            'ASJ': 'Ashkenazi Jewish',
+            'EAS': 'East Asian',
+            'FIN': 'European (Finnish)',
+            'NFE': 'European (non-Finnish)',
+            'OTH': 'Other',
+            'SAS': 'South Asian',
+            'MID': 'Middle Eastern'
         }
 
 SUBPOPULATION_ID_MAP = {
             'XX': 'XX',
             'XY': 'XY',
+            'FEMALE': 'XX',
+            'MALE': 'XY',
 
             'JPN': 'Japanese',
             'KOR': 'Korean',
@@ -88,8 +90,8 @@ class DataManager:
         for variant in self.raw_df['genome']:
             for population in variant['populations']:
                 pop_id = population['id']
-                pop_allele_freq = population['ac'] / population['an']
-                populations_freq_column[pop_id].append("{:e}".format(pop_allele_freq))
+                pop_allele_freq = population['ac'] / population['an'] if population['an'] else 0
+                populations_freq_column[pop_id.upper()].append("{:e}".format(pop_allele_freq))
 
         return populations_freq_column
 
@@ -97,7 +99,8 @@ class DataManager:
     def _add_populations_freq_column(self, populations_freq_column, df):
         df_copy = deepcopy(df)
         for pop_id, pop_freqs in populations_freq_column.items():
-            df_copy[POPULATION_ID_MAP[pop_id]] = pop_freqs
+            if pop_freqs:   # If there is actually recorded frequencies for that population
+                df_copy[POPULATION_ID_MAP[pop_id]] = pop_freqs
         return df_copy
 
 
@@ -224,11 +227,16 @@ class DataManager:
             new_row_name = ""
             
             for piece in row_id.split('_'):
+
+                piece = piece.upper()
                 try:
                     new_row_name += POPULATION_ID_MAP[piece] + " "
                 except:
-                    new_row_name += SUBPOPULATION_ID_MAP[piece] + " "
-            
+                    try:
+                        new_row_name += SUBPOPULATION_ID_MAP[piece] + " "
+                    except:
+                        new_row_name += piece
+
             new_row_name = new_row_name[0:-1]
             new_index[row_id] = new_row_name
             
@@ -238,14 +246,16 @@ class DataManager:
             frequencies.append(frequency)
             
 
-        new_index['FEMALE'] = 'Total Female'
-        new_index['MALE'] = 'Total Male'
+        new_index['XX'] = 'Total XX'
+        new_index['XY'] = 'Total XY'
+        new_index['FEMALE'] = 'Total XX'
+        new_index['MALE'] = 'Total XY'
         new_columns = {'ac': 'Allele Count', 'an': 'Allele Number',
                     'ac_hemi': 'Number of Hemizygotes', 'ac_hom': 'Number of Homozygotes'}
 
         df = reqdf.rename(columns=new_columns, index=new_index)
-
-        total_row = df.loc['Total Female'] + df.loc['Total Male']
+        
+        total_row = df.loc['Total XX'] + df.loc['Total XY']
         total_row.name = 'Total'
         df = df.append([total_row])
 

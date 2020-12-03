@@ -449,6 +449,10 @@ variant_in_gene = """query VariantsInGene($geneId: String!, $datasetId: DatasetI
           ac_hom
         }
       }
+      lof_curation {
+        verdict
+        flags
+      }
     }
   }
 }"""
