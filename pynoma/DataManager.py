@@ -3,20 +3,21 @@ from copy import deepcopy
 
 
 POPULATION_ID_MAP = {
-            'AFR': 'African',
-            'AMI': 'Amish',
-            'AMR': 'Latino',
-            'ASJ': 'Ashkenazi Jewish',
-            'EAS': 'East Asian',
-            'FIN': 'European (Finnish)',
-            'NFE': 'European (non-Finnish)',
-            'OTH': 'Other',
-            'SAS': 'South Asian',
+            'afr': 'African',
+            'ami': 'Amish',
+            'amr': 'Latino',
+            'asj': 'Ashkenazi Jewish',
+            'eas': 'East Asian',
+            'fin': 'European (Finnish)',
+            'nfe': 'European (non-Finnish)',
+            'oth': 'Other',
+            'sas': 'South Asian',
+            'mid': 'Middle Eastern'
         }
 
 SUBPOPULATION_ID_MAP = {
-            'FEMALE': 'Female',
-            'MALE': 'Male',
+            'XX': 'XX',
+            'XY': 'XY',
 
             'JPN': 'Japanese',
             'KOR': 'Korean',
@@ -180,8 +181,8 @@ class DataManager:
             standard_cols.append('Number of Hemizygotes')
         df['Source'] = region
 
-        if self.gnomad_version == 'gnomad_r2_1':
-            standard_cols.append('Source')
+        #if self.gnomad_version == 'gnomad_r2_1':
+        standard_cols.append('Source')
         return df
 
 

@@ -650,3 +650,69 @@ variant_search_variables = """{
   "datasetId": "%s",
   "variantId": "%s"
 }"""
+
+
+
+variant_in_transcript = """query VariantsInTranscript($transcriptId: String!, $datasetId: DatasetId!, $referenceGenome: ReferenceGenomeId!) {
+  transcript(transcript_id: $transcriptId, reference_genome: $referenceGenome) {
+    clinvar_variants {
+      clinical_significance
+      clinvar_variation_id
+      gold_stars
+      major_consequence
+      pos
+      variant_id
+    }
+    variants(dataset: $datasetId) {
+      consequence
+      flags
+      gene_id
+      gene_symbol
+      hgvs
+      hgvsc
+      hgvsp
+      lof
+      lof_filter
+      lof_flags
+      pos
+      rsid
+      variant_id: variantId
+      exome {
+        ac
+        ac_hemi
+        ac_hom
+        an
+        af
+        filters
+        populations {
+          id
+          ac
+          an
+          ac_hemi
+          ac_hom
+        }
+      }
+      genome {
+        ac
+        ac_hemi
+        ac_hom
+        an
+        af
+        filters
+        populations {
+          id
+          ac
+          an
+          ac_hemi
+          ac_hom
+        }
+      }
+    }
+  }
+}"""
+
+variant_in_transcript_variables = """{
+  "datasetId": "%s",
+  "transcriptId": "%s",
+  "referenceGenome": "GRCh38"
+}"""

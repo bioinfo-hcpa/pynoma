@@ -136,6 +136,42 @@ class GeneSearch(Search):
 
 
 
+class TranscriptSearch(Search):
+    def __init__(self, dataset_version:int, transcript: str):
+        from pynoma.Queries import variant_in_transcript, variant_in_transcript_variables
+        
+        self.transcript = transcript
+        super().__init__(dataset_version, variant_in_transcript, variant_in_transcript_variables)
+        
+        
+    def get_data(self, standard=True, additional_population_info=False):
+        json_data = self.get_json()
+
+        if not json_data['data']['transcript']['variants']:
+            print("No variants found for given transcript.")
+            return (None, None)
+
+        json_data['data']['region'] = json_data['data'].pop('transcript')
+        self.dm = DataManager(json_data, self.dataset_id)
+
+        if standard:
+            self.dm.process_standard_dataframe()
+            if additional_population_info:
+                return self.dm.get_additional_pop_info_df('standard'), self.dm.clinical_df
+            return self.dm.standard_df, self.dm.clinical_df
+        
+        else:
+            if additional_population_info:
+                return self.dm.get_additional_pop_info_df('raw'), self.dm.clinical_df
+            return self.dm.raw_df, self.dm.clinical_df
+        
+    def get_json(self):
+        variables = (self.dataset_id, self.transcript)
+        return self.request_gnomad(variables)
+    
+
+
+
 class VariantSearch(Search):
 
     # variant_id: chromosome-position-original_nucleotide-variant
