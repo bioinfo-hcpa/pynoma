@@ -24,6 +24,17 @@ df, clinical_df = gs.get_data()
 
 ### Search by transcript
 
+
+TranscriptSearch(gnomad_version: int, transcript_id: str)<br />
+.get_data(standard=True, additional_population_info=False)
+
+```python
+from pynoma import TranscriptSearch
+ts = TranscriptSearch(3, "ENST00000247933")
+df, clinical_df = ts.get_data()
+```
+
+
 ### Search by region
 
 RegionSearch(gnomad_version: int, chromosome, region_start: int, region_end: int)<br />
