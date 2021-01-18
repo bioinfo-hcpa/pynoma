@@ -37,10 +37,11 @@ SUBPOPULATION_ID_MAP = {
 
 class DataManager:
 
-    def __init__(self, json_data, gnomad_version:str, variant_search=False):
+    def __init__(self, json_data, gnomad_version:str, variant_search=False, second_level_key='region'):
         self.json_data = json_data
         self.variant_search = variant_search
         self.gnomad_version = gnomad_version 
+        self.second_level_key = second_level_key
 
         self.raw_df = None
         self.clinical_df = None
@@ -54,8 +55,8 @@ class DataManager:
             self.__process_variant_search_data()
         
         else:
-            clinical_var = self.json_data['data']['region']['clinvar_variants']
-            variants = self.json_data['data']['region']['variants']
+            clinical_var = self.json_data['data'][self.second_level_key]['clinvar_variants']
+            variants = self.json_data['data'][self.second_level_key]['variants']
             self.raw_df = pd.DataFrame(variants)
             self.clinical_df = pd.DataFrame(clinical_var)
         return

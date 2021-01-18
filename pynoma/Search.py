@@ -95,6 +95,10 @@ class GeneSearch(Search):
         if not self.get_ensembl_id(gene_id_variables):
             return 
 
+        from pynoma.Queries import variant_in_gene, variant_in_gene_variables
+        self.query = variant_in_gene
+        self.query_vars = variant_in_gene_variables
+        """
         from pynoma.Queries import gene_search, gene_search_variables
         self.query = gene_search
         self.query_vars = gene_search_variables
@@ -106,6 +110,7 @@ class GeneSearch(Search):
 
         self.region_search = RegionSearch(dataset_version, self.chromosome, 
                                             self.start, self.end)
+        """
 
 
     def get_ensembl_id(self, query_variables):
@@ -126,13 +131,33 @@ class GeneSearch(Search):
         self.end = gene_info['data']['gene']['stop']
         return
 
+    def get_json(self):
+        variables = (self.dataset_id, self.gene_ens_id)
+        return self.request_gnomad(variables)
+
 
     def get_data(self, standard=True, additional_population_info=False):
         if not self.gene_ens_id:
             return (None, None)
-        dataframes = self.region_search.get_data(standard, additional_population_info)
-        self.dm = self.region_search.dm
-        return dataframes
+        #dataframes = self.region_search.get_data(standard, additional_population_info)
+        #self.dm = self.region_search.dm
+        json_data = self.get_json()
+        if not json_data['data']['gene']['variants']:
+            print("No variants found.")
+            return (None, None)
+
+        self.dm = DataManager(json_data, self.dataset_id, second_level_key='gene')
+
+        if standard:
+            self.dm.process_standard_dataframe()
+            if additional_population_info:
+                return self.dm.get_additional_pop_info_df('standard'), self.dm.clinical_df
+            return self.dm.standard_df, self.dm.clinical_df
+        
+        else:
+            if additional_population_info:
+                return self.dm.get_additional_pop_info_df('raw'), self.dm.clinical_df
+            return self.dm.raw_df, self.dm.clinical_df
 
 
 

@@ -13,6 +13,7 @@ in_region_v3 = """query VariantInRegion($chrom: String!, $start: Int!, $stop: In
       flags
       gene_id
       gene_symbol
+      transcript_id
       hgvs
       hgvsc
       hgvsp
@@ -71,6 +72,7 @@ in_region_v2 = """query VariantInRegion($chrom: String!, $start: Int!, $stop: In
       flags
       gene_id
       gene_symbol
+      transcript_id
       hgvs
       hgvsc
       hgvsp
@@ -409,6 +411,8 @@ variant_in_gene = """query VariantsInGene($geneId: String!, $datasetId: DatasetI
     variants(dataset: $datasetId) {
       consequence
       flags
+      gene_id
+      gene_symbol
       hgvs
       hgvsc
       hgvsp
