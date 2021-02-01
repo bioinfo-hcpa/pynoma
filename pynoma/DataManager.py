@@ -87,12 +87,38 @@ class DataManager:
         populations_freq_column = {}
         for pop_id in POPULATION_ID_MAP:
             populations_freq_column[pop_id] = []
-    
-        for variant in self.raw_df['genome']:
-            for population in variant['populations']:
-                pop_id = population['id']
-                pop_allele_freq = population['ac'] / population['an'] if population['an'] else 0
-                populations_freq_column[pop_id.upper()].append("{:e}".format(pop_allele_freq))
+
+        for row in self.raw_df.loc[:, ['genome','exome']].iterrows():
+            
+            row_num = row[0]
+            genome_variant = row[1]['genome']
+            exome_variant = row[1]['exome']
+
+            if genome_variant:
+                if exome_variant:   # thre's genome and exome data
+                    for i in range(len(genome_variant['populations'])):
+                        ac = exome_variant['populations'][i]['ac'] + genome_variant['populations'][i]['ac']
+                        an = exome_variant['populations'][i]['an'] + genome_variant['populations'][i]['an']
+                        pop_id = genome_variant['populations'][i]['id']
+                        pop_allele_freq = ac/an if an else 0
+                        populations_freq_column[pop_id.upper()].append("{:e}".format(pop_allele_freq))
+                
+                else:   # there's only genome data
+                    for i in range(len(genome_variant['populations'])):
+                        ac = genome_variant['populations'][i]['ac']
+                        an = genome_variant['populations'][i]['an']
+                        pop_id = genome_variant['populations'][i]['id']
+                        pop_allele_freq = ac/an if an else 0
+                        populations_freq_column[pop_id.upper()].append("{:e}".format(pop_allele_freq))
+        
+
+            else:  # there's only exome data
+                for i in range(len(exome_variant['populations'])):
+                    ac = exome_variant['populations'][i]['ac']
+                    an = exome_variant['populations'][i]['an']
+                    pop_id = exome_variant['populations'][i]['id']
+                    pop_allele_freq = ac/an if an else 0
+                    populations_freq_column[pop_id.upper()].append("{:e}".format(pop_allele_freq))
 
         return populations_freq_column
 
