@@ -255,7 +255,14 @@ class DataManager:
 
     def __build_variant_search_standard_df(self):
         
-        reqdf = pd.json_normalize(self.json_data['data']['variant']['genome']['populations']).set_index('id')
+        if self.json_data['data']['variant']['genome']:     
+            if self.json_data['data']['variant']['exome']:  # genome and exome
+                reqdf = pd.json_normalize(self.json_data['data']['variant']['genome']['populations']).set_index('id') + \
+                        pd.json_normalize(self.json_data['data']['variant']['exome']['populations']).set_index('id')
+            else:  # only genome
+                reqdf = pd.json_normalize(self.json_data['data']['variant']['genome']['populations']).set_index('id')
+        else:   # only exome
+            reqdf = pd.json_normalize(self.json_data['data']['variant']['exome']['populations']).set_index('id')
 
         new_index = {}
         frequencies = []

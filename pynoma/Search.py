@@ -219,7 +219,7 @@ class VariantSearch(Search):
             return (None, None)
 
         if raw:
-            return json_data
+            return json_data, None
         else:
             self.dm = DataManager(json_data, self.dataset_id, variant_search=True)
             return self.dm.standard_df, self.dm.variant_metadata
