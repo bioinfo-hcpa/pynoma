@@ -141,39 +141,42 @@ class DataManager:
         num_hemizygotes = []
         region = []
 
-        for variant in df['genome']:
-            if variant:
-                allele_count.append(variant['ac'])
-                allele_number.append(variant['an'])
-                allele_freq.append(variant['af'])
-                
-                n_homs = 0
-                n_hemi = 0
-                for population in variant['populations']:
-                    n_homs += population['ac_hom']
-                    n_hemi += population['ac_hemi']
-                
-                num_homozygotes.append(n_homs)
-                num_hemizygotes.append(n_hemi)
-                region.append('Genome')
+        for row in df.loc[:, ['genome','exome']].iterrows():
             
-            else:
-                region.append('Exome')
-
-        if self.gnomad_version == 'gnomad_r2_1':
-            for variant in df['exome']:
-                if variant:
-                    allele_count.append(variant['ac'])
-                    allele_number.append(variant['an'])
-                    allele_freq.append(variant['af'])
+            row_num = row[0]
+            genome_variant = row[1]['genome']
+            exome_variant = row[1]['exome']
+            n_homs = 0
+            n_hemi = 0
+            
+            if genome_variant:
+                n_homs, n_hemi = self._count_homos_hemis_variant_pops(n_homs, n_hemi, genome_variant)
                 
-                    n_homs = 0
-                    n_hemi = 0
-                    for population in variant['populations']:
-                        n_homs += population['ac_hom']
-                        n_hemi += population['ac_hemi']
-                    num_homozygotes.append(n_homs)
-                    num_hemizygotes.append(n_hemi)
+                if exome_variant:   #there's genome and exome
+                    n_homs, n_hemi = self._count_homos_hemis_variant_pops(n_homs, n_hemi, exome_variant)
+                    variant_ac = genome_variant['ac']+exome_variant['ac']
+                    variant_an = genome_variant['an']+exome_variant['an']
+                    variant_af = genome_variant['af']+exome_variant['af']
+                    region.append("Genome and Exome")
+                    
+                else:   #there's only genome
+                    variant_ac = genome_variant['ac']
+                    variant_an = genome_variant['an']
+                    variant_af = genome_variant['af']
+                    region.append("Genome")
+                    
+            else:   #there's only exome
+                n_homs, n_hemi = self._count_homos_hemis_variant_pops(n_homs, n_hemi, exome_variant)
+                variant_ac = exome_variant['ac']
+                variant_an = exome_variant['an']
+                variant_af = exome_variant['af']
+                region.append("Exome")
+        
+            num_homozygotes.append(n_homs)
+            num_hemizygotes.append(n_hemi)
+            allele_count.append(variant_ac)
+            allele_number.append(variant_an)
+            allele_freq.append(variant_af)
 
 
         df['Allele Count'] = allele_count
@@ -188,6 +191,13 @@ class DataManager:
         #if self.gnomad_version == 'gnomad_r2_1':
         standard_cols.append('Source')
         return df
+
+    
+    def _count_homos_hemis_variant_pops(self, n_homs, n_hemi, variant):
+        for population in variant['populations']:
+            n_homs += population['ac_hom']
+            n_hemi += population['ac_hemi']
+        return n_homs, n_hemi
 
 
     def _add_variant_columns(self):
