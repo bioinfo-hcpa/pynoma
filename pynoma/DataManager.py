@@ -318,6 +318,9 @@ class DataManager:
 
     def __extract_variant_metadata(self):
         metadata = deepcopy(self.json_data)
-        metadata['data']['variant']['genome'].pop('populations')
+        if metadata['data']['variant']['genome']:
+            metadata['data']['variant']['genome'].pop('populations')
+        if metadata['data']['variant']['exome']:
+            metadata['data']['variant']['exome'].pop('populations')
         self.variant_metadata = metadata['data']['variant']
         return

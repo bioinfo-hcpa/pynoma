@@ -12,7 +12,8 @@ setup(
   install_requires=[
           'pandas>=1.0.5',
           'numpy>=1.19.0',
-          'requests>=2.24.0'
+          'requests>=2.24.0',
+          'seaborn'
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',      
