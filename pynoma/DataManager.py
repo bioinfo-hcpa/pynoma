@@ -134,6 +134,7 @@ class DataManager:
 
         renamed_cols = {
                             'variant_id': 'Variant ID',
+                            'rsid': 'rsID',
                             'gene_symbol': 'Gene',
                             'hgvs': 'Consequence',
                             'consequence': 'Annotation',
@@ -141,7 +142,7 @@ class DataManager:
                         }
         
         standard_cols = [
-                    'Variant ID', 'Gene', 'Consequence', 
+                    'Variant ID', 'rsID', 'Gene', 'Consequence', 
                     'Annotation', 'Flags', 'Allele Count',
                     'Allele Number', 'Allele Frequency',
                     'Number of Homozygotes'
