@@ -90,7 +90,6 @@ class DataManager:
 
         for row in self.raw_df.loc[:, ['genome','exome']].iterrows():
             
-            row_num = row[0]
             genome_variant = row[1]['genome']
             exome_variant = row[1]['exome']
 
@@ -169,7 +168,6 @@ class DataManager:
 
         for row in df.loc[:, ['genome','exome']].iterrows():
             
-            row_num = row[0]
             genome_variant = row[1]['genome']
             exome_variant = row[1]['exome']
             n_homs = 0
