@@ -27,7 +27,7 @@ def batch_search(search_objects, standard=True, additional_population_info=False
     datasets=[]
     total_searches = len(search_objects)
     for i, obj in enumerate(search_objects):
-        print("Batch searching... ", i, "/", total_searches)
+        print("Batch searching... ", i+1, "/", total_searches)
         sleep(uniform(1,5))
         try:
             obj_df, _ = obj.get_data(standard=standard, additional_population_info=additional_population_info) 
