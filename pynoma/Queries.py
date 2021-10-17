@@ -181,17 +181,17 @@ fetch_region = """query FetchRegion($chrom: String!, $start: Int!, $stop: Int!, 
 
 
 
-gene_id = """query Search($dataset: DatasetId!, $query: String!) {
-    searchResults(dataset: $dataset, query: $query) {
-      label
-      value: url
-    }
-  }"""
-
+gene_id = """query GeneSearch($query: String!, $referenceGenome: ReferenceGenomeId!) {
+            gene_search(query: $query, reference_genome: $referenceGenome) {
+              ensembl_id
+              symbol
+            }
+          }
+        """
 
 gene_id_variables = """{
-  "dataset": "%s",
-  "query": "%s"
+  "query": "%s",
+  "referenceGenome": "%s"
 }"""
 
 

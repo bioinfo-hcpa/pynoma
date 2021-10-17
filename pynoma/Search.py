@@ -98,29 +98,15 @@ class GeneSearch(Search):
         from pynoma.Queries import variant_in_gene, variant_in_gene_variables
         self.query = variant_in_gene
         self.query_vars = variant_in_gene_variables
-        """
-        from pynoma.Queries import gene_search, gene_search_variables
-        self.query = gene_search
-        self.query_vars = gene_search_variables
-        
-        self.chromosome = None
-        self.start = None
-        self.end = None
-        self.get_gene_information()
-
-        self.region_search = RegionSearch(dataset_version, self.chromosome, 
-                                            self.start, self.end)
-        """
 
 
     def get_ensembl_id(self, query_variables):
-        json_data = self.request_gnomad((self.dataset_id, self.gene))
-        if not json_data['data']['searchResults']:
+        json_data = self.request_gnomad((self.gene, self.reference_genome))
+        if not json_data['data']['gene_search']:
             print("No gene found with given name.")
             return False
         
-        str_ensg = json_data['data']['searchResults'][0]['value']
-        self.gene_ens_id = str_ensg.split('/')[-1].split('?')[0]
+        self.gene_ens_id = json_data['data']['gene_search'][0]['ensembl_id']
         return True
 
 
@@ -139,8 +125,6 @@ class GeneSearch(Search):
     def get_data(self, standard=True, additional_population_info=False):
         if not self.gene_ens_id:
             return (None, None)
-        #dataframes = self.region_search.get_data(standard, additional_population_info)
-        #self.dm = self.region_search.dm
         json_data = self.get_json()
         if not json_data['data']['gene']['variants']:
             print("No variants found.")
