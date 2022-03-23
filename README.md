@@ -81,3 +81,15 @@ df, meta = vs.get_data()
 
 ## Batch search
 
+If the user wants to configure multiple searches, including different ones (gene, transcript, region) with the exception of variant searches (that have different dataframe formats), they can use the batch search function.
+For example, to search for variants in a list of 5 genes, let's say _ACE2_, _BRCA_, _ID4_, _MTOR_ and _EMP1_, the batch search can be used as follows:
+
+```python
+from pynoma import helper, GeneSearch
+genes = [GeneSearch(3, "ace2"), GeneSearch(3, "brca"), GeneSearch(3, "id4"), GeneSearch(3, "mtor"), GeneSearch(3, "emp1")]
+df = helper.batch_search(genes, standard=True, additional_population_info=False, verbose=True)
+```
+
+Besides the list of Search objects, the other parameters (standard, additional_population_info and verbose) follow the same logic of the individual searches.
+
+
