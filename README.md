@@ -1,9 +1,31 @@
-# pynoma
+# Pynoma
 
 ![](https://img.shields.io/badge/python-v3.x-blue)
 
+## Summary
+
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Search Types](#search-types)
+    - [Search by gene](#search-by-gene)
+    - [Search by region](#search-by-region)
+    - [Search by transcript](#search-by-transcript)
+    - [Search by variant](#search-by-variant)
+- [Batch search](#batch-search)
+
 ## Introduction
 
+Pynoma is an API developed to facilitate the access to human variant data from gnomAD database, working both with gnomAD version 2 and 3.
+The package retrieves both regular as well as clinical data, and offers support to four kinds of different searches, as well as the possibility to search in batches.
+For plotting the data, please take a look at the [BIOVARS package](https://github.com/bioinfo-hcpa/biovars).
+
+## Installation
+
+
+Currently there is not a PyPI version for the Pynoma API, so the installation needs that you clone this repository and install it as local package.
+
+    $ git clone https://github.com/bioinfo-hcpa/pynoma.git
+    $ pip install -e pynoma
 
 ## Search Types
 
@@ -57,14 +79,5 @@ vs = VariantSearch(3, '4-1002747-G-A')
 df, meta = vs.get_data()
 ```
 
-## Features
+## Batch search
 
-Not available yet.
-A class Helper will be provided to attend:
-* Batch searching 
-* Data filtering methods
-* Saving dataframe methods
-
-## Additional Information
-
-## References
