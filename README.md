@@ -40,7 +40,7 @@ GeneSearch(gnomad_version: int, gene: str)<br />
 
 ```python
 from pynoma import GeneSearch
-gs = GeneSearch(3, "idua")
+gs = GeneSearch(3, "IDUA")
 df, clinical_df = gs.get_data()
 ```
 
