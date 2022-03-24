@@ -86,7 +86,7 @@ For example, to search for variants in a list of 5 genes, let's say _ACE2_, _BRC
 
 ```python
 from pynoma import helper, GeneSearch
-genes = [GeneSearch(3, "ace2"), GeneSearch(3, "brca"), GeneSearch(3, "id4"), GeneSearch(3, "mtor"), GeneSearch(3, "emp1")]
+genes = [GeneSearch(3, "ACE2"), GeneSearch(3, "BRCA"), GeneSearch(3, "ID4"), GeneSearch(3, "MTOR"), GeneSearch(3, "EMP1")]
 df = helper.batch_search(genes, standard=True, additional_population_info=False, verbose=True)
 ```
 
