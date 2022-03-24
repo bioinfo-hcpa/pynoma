@@ -1,5 +1,6 @@
 from requests import post
 from pynoma.DataManager import DataManager
+from pynoma.Logger import Logger
 
 class Search:
 
@@ -64,7 +65,7 @@ class RegionSearch(Search):
 
         json_data = self.get_json()
         if not json_data['data']['region']['variants']:
-            print("No variants found.")
+            Logger.no_variants_found()
             return (None, None)
 
         self.dm = DataManager(json_data, self.dataset_id)
@@ -103,7 +104,7 @@ class GeneSearch(Search):
     def get_ensembl_id(self, query_variables):
         json_data = self.request_gnomad((self.gene, self.reference_genome))
         if not json_data['data']['gene_search']:
-            print("No gene found with given name.")
+            Logger.no_gene_found_with_given_name(self.gene)
             return False
         
         self.gene_ens_id = json_data['data']['gene_search'][0]['ensembl_id']
@@ -127,7 +128,7 @@ class GeneSearch(Search):
             return (None, None)
         json_data = self.get_json()
         if not json_data['data']['gene']['variants']:
-            print("No variants found.")
+            Logger.no_variants_found()
             return (None, None)
 
         self.dm = DataManager(json_data, self.dataset_id, second_level_key='gene')
@@ -157,7 +158,7 @@ class TranscriptSearch(Search):
         json_data = self.get_json()
 
         if not json_data['data']['transcript']['variants']:
-            print("No variants found for given transcript.")
+            Logger.no_variants_found_for_given_transcript(self.transcript)
             return (None, None)
 
         json_data['data']['region'] = json_data['data'].pop('transcript')
@@ -199,7 +200,7 @@ class VariantSearch(Search):
     def get_data(self, raw=False):
         json_data = self.get_json()
         if not json_data['data']['variant']:
-            print("Variant not found.")
+            Logger.variant_not_found(self.variant_id)
             return (None, None)
 
         if raw:

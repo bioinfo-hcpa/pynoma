@@ -1,3 +1,4 @@
+from pynoma.Logger import Logger
 from matplotlib import style
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
@@ -28,7 +29,7 @@ def batch_search(search_objects, standard=True, additional_population_info=False
     total_searches = len(search_objects)
     for i, obj in enumerate(search_objects):
         if verbose:
-            print("Batch searching... ", i+1, "/", total_searches)
+            Logger.batch_searching(i+1, total_searches)
         sleep(uniform(1,5))
         try:
             obj_df, _ = obj.get_data(standard=standard, additional_population_info=additional_population_info) 
@@ -42,4 +43,8 @@ def batch_search(search_objects, standard=True, additional_population_info=False
                     datasets.append(obj_df)
             else:
                 raise(e)
+                
+    if len(datasets) == 0:
+        return None
+
     return pd.concat(datasets)#.fillna(0)
