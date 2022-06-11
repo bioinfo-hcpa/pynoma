@@ -12,12 +12,14 @@
     - [Search by transcript](#search-by-transcript)
     - [Search by variant](#search-by-variant)
 - [Batch search](#batch-search)
+- [BibTeX entry](#bibtex-entry) 
+- [Acknowledgement](#acknowledgement)
 
 ## Introduction
 
 Pynoma is an API developed to facilitate the access to human variant data from gnomAD database, working both with gnomAD version 2 and 3.
 The package retrieves both regular as well as clinical data, and offers support to four kinds of different searches, as well as the possibility to search in batches.
-For plotting the data, please take a look at the [BIOVARS package](https://github.com/bioinfo-hcpa/biovars).
+For plotting the data, please take a look at the [BIOVARS package](https://github.com/bioinfo-hcpa/biovars). If you have scientific interests or want to use our package in formal reports, we kindly ask you to cite us in your publication: [Carneiro, P., Colombelli, F., Recamonde-Mendoza, M., and Matte, U. (2022). Pynoma, PyABraOM and BIOVARS: Towards genetic variant data acquisition and integration. bioRxiv.](#bibtex-entry)
 
 ## Installation
 
@@ -93,3 +95,22 @@ df = helper.batch_search(genes, standard=True, additional_population_info=False,
 Besides the list of Search objects, the other parameters (standard, additional_population_info and verbose) follow the same logic of the individual searches.
 
 
+## BibTeX entry
+
+```
+@article {Carneiro2022.06.07.495190,
+	author = {Carneiro, Paola and Colombelli, Felipe and Recamonde-Mendoza, Mariana and Matte, Ursula},
+	title = {Pynoma, PyABraOM and BIOVARS: Towards genetic variant data acquisition and integration},
+	elocation-id = {2022.06.07.495190},
+	year = {2022},
+	doi = {10.1101/2022.06.07.495190},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2022/06/09/2022.06.07.495190},
+	eprint = {https://www.biorxiv.org/content/early/2022/06/09/2022.06.07.495190.full.pdf},
+	journal = {bioRxiv}
+}
+```
+
+## Acknowledgement
+
+This research was supported by the National Council for Scientific and Technological Development (CNPq) and the Research Incentive Fund (FIPE) from Hospital de Clínicas de Porto Alegre.
