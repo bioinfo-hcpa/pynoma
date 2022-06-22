@@ -1,11 +1,11 @@
 from distutils.core import setup
 setup(
-  name = 'pynoma',         
+  name = 'Pynoma',         
   packages = ['pynoma'],  
-  version = '0.0.1',
+  version = '0.1.0',
   license='GNU General Public License v3.0',
   description = 'A Python API to communicate with gnomAD database.',   
-  author = 'Felipe Colombelli, Paola Barcelos Carneiro',                   
+  author = 'Felipe Colombelli, Paola Carneiro',                   
   author_email = 'bioinfo@hcpa.edu.br',
   url = 'https://github.com/bioinfo-hcpa/pynoma',
   keywords = ['gnomad', 'api', 'variants', 'genes'],
@@ -19,7 +19,7 @@ setup(
     'Development Status :: 3 - Alpha',      
     'Intended Audience :: Developers',      
     'Topic :: Software Development :: Build Tools',
-    'License :: GNU General Public License v3.0',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     'Programming Language :: Python :: 3.8',
   ],
 )
