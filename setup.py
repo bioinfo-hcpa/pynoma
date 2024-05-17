@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'Pynoma',         
   packages = ['pynoma'],  
-  version = '0.1.0',
+  version = '0.2.0',
   license='GNU General Public License v3.0',
   description = 'A Python API to communicate with gnomAD database.',   
   author = 'Felipe Colombelli, Paola Carneiro',                   
