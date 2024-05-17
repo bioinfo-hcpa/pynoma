@@ -1,4 +1,5 @@
 """This module contains the Search class, which is used to search the gnomAD database."""
+from time import sleep
 from typing import Any, Union
 from requests import post
 import pandas as pd
@@ -34,17 +35,38 @@ class Search:
         self.dm = None   # attribute holding DataManager object
 
     
-    def request_gnomad(self, variables: Union[str, tuple]) -> dict[str, Any]:
+    def request_gnomad(self, 
+                       variables: Union[str, tuple], 
+                       retry_on_429: bool = True,
+                       retry_sleep: int = 20
+                       ) -> dict[str, Any]:
         """Send a POST request to the gnomAD API.
 
         Args:
             variables: The variables to be used in the query. See examples in the Queries file.
+            retry_on_429: If True, the request will be retried if gnomAD complains about too many requests.
+            retry_sleep: The number of seconds to wait before retrying the request.
 
         Returns:
             The response JSON from the gnomAD API request.
         """
         variables = self.query_vars % variables
-        response = post(self.end_point, data={'query': self.query, 'variables': variables}, timeout=None)
+
+        retry_count = 0
+        while retry_count < 5:
+            response = post(self.end_point, data={'query': self.query, 'variables': variables}, timeout=None)
+            if response.status_code == 429:
+                if not retry_on_429:
+                    Logger.too_many_requests_error(0)
+                    raise Exception("gnomAD is complaining about too many requests. Please try again later.")
+                Logger.too_many_requests_error(retry_sleep)
+                sleep(retry_sleep)
+                retry_count += 1
+                
+            elif not response.ok:
+                raise Exception(f"Request to gnomAD failed: {response}. Check your input or try again later.")
+            else:
+                break
         return response.json()
 
     
