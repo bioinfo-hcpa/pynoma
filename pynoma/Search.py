@@ -1,5 +1,5 @@
 """This module contains the Search class, which is used to search the gnomAD database."""
-from typing import Union
+from typing import Any, Union
 from requests import post
 import pandas as pd
 from pynoma.DataManager import DataManager
@@ -34,7 +34,7 @@ class Search:
         self.dm = None   # attribute holding DataManager object
 
     
-    def request_gnomad(self, variables: Union[str, tuple]) -> dict:
+    def request_gnomad(self, variables: Union[str, tuple]) -> dict[str, Any]:
         """Send a POST request to the gnomAD API.
 
         Args:
@@ -113,7 +113,7 @@ class RegionSearch(Search):
                  standard=True, 
                  additional_population_info=False
                  ) -> tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
-        """Get the data from the gnomAD API.
+        """Get the region data from the gnomAD API.
 
         Args:
             standard: If True, the data will be processed and returned in a standard format. Defaults to True.
@@ -122,7 +122,9 @@ class RegionSearch(Search):
                 Defaults to False.
 
         Returns:
-            A tuple containing the dataframe with the data and the clinical dataframe.
+            A tuple containing two dataframes. The first dataframe is the standard dataframe, and the second dataframe
+                is the clinical dataframe. If no data is found or if the gene_ens_id is not provided, both dataframes
+                will be None.
         """
         json_data = self.get_json()
         if not json_data['data']['region']['variants']:
@@ -148,13 +150,18 @@ class RegionSearch(Search):
 class GeneSearch(Search):
 
     def __init__(self, dataset_version: Union[int, str], gene: str):
+        """Constructor for the GeneSearch class.
 
+        Args:
+            dataset_version: The version of the gnomAD dataset to be used. It can be either 2, 3 or hg19/h38.
+            gene: The gene name to search for.
+        """
         from pynoma.Queries import gene_id, gene_id_variables
         super().__init__(dataset_version, gene_id, gene_id_variables)
         
         self.gene = gene
         self.gene_ens_id = None
-        if not self.get_ensembl_id(gene_id_variables):
+        if not self.get_ensembl_id():
             return 
 
         from pynoma.Queries import variant_in_gene, variant_in_gene_variables
@@ -162,29 +169,51 @@ class GeneSearch(Search):
         self.query_vars = variant_in_gene_variables
 
 
-    def get_ensembl_id(self, query_variables):
+    def get_ensembl_id(self) -> bool:
+        """Check whether the gene name provided by the user is valid.
+
+        Returns:
+            True if the gene name is valid, False otherwise.
+        """
         json_data = self.request_gnomad((self.gene, self.reference_genome))
         if not json_data['data']['gene_search']:
             Logger.no_gene_found_with_given_name(self.gene)
             return False
-        
-        self.gene_ens_id = json_data['data']['gene_search'][0]['ensembl_id']
+        self.gene_ens_id: str = json_data['data']['gene_search'][0]['ensembl_id']
         return True
 
-
     def get_gene_information(self):
+        """Get information about the gene from the gnomAD API to actually make the query."""
         gene_info = self.request_gnomad(self.gene_ens_id)
         self.chromosome = gene_info['data']['gene']['chrom']
         self.start = gene_info['data']['gene']['start']
         self.end = gene_info['data']['gene']['stop']
         return
 
-    def get_json(self):
+    def get_json(self) -> dict[str, Any]:
+        """Get the JSON data from the gnomAD API."""
         variables = (self.dataset_id, self.gene_ens_id)
         return self.request_gnomad(variables)
 
+    def get_data(self, 
+                 standard: bool = True,
+                 additional_population_info: bool = False
+                 ) -> tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
+        """Get the gene data from the gnomAD API.
 
-    def get_data(self, standard=True, additional_population_info=False):
+        This method retrieves data from the gnomAD API based on the provided gene_ens_id.
+        It returns a tuple containing two dataframes: the standard dataframe and the clinical dataframe.
+
+        Args:
+            standard: Flag indicating whether to process the data using the standard method. Defaults to True.
+            additional_population_info: Flag indicating whether to include additional population information in the
+                returned dataframes. Defaults to False.
+
+        Returns:
+            A tuple containing two dataframes. The first dataframe is the standard dataframe, and the second dataframe
+                is the clinical dataframe. If no data is found or if the gene_ens_id is not provided, both dataframes
+                will be None.
+        """
         if not self.gene_ens_id:
             return (None, None)
         json_data = self.get_json()
@@ -198,8 +227,8 @@ class GeneSearch(Search):
             self.dm.process_standard_dataframe()
             if additional_population_info:
                 return self.dm.get_additional_pop_info_df('standard'), self.dm.clinical_df
-            return self.dm.standard_df, self.dm.clinical_df
-        
+            return self.dm.standard_df, self.dm.clinical_df  # TODO: investigate type-checking complaint
+
         else:
             if additional_population_info:
                 return self.dm.get_additional_pop_info_df('raw'), self.dm.clinical_df
@@ -208,14 +237,34 @@ class GeneSearch(Search):
 
 
 class TranscriptSearch(Search):
-    def __init__(self, dataset_version:int, transcript: str):
+    def __init__(self, dataset_version: Union[str, int], transcript: str):
+        """Constructor for the TranscriptSearch class.
+
+        Args:
+            dataset_version: The version of the gnomAD dataset to be used. It can be either 2, 3 or hg19/h38.
+            transcript: The transcript ID to search for.
+        """
         from pynoma.Queries import variant_in_transcript, variant_in_transcript_variables
-        
         self.transcript = transcript
         super().__init__(dataset_version, variant_in_transcript, variant_in_transcript_variables)
         
         
-    def get_data(self, standard=True, additional_population_info=False):
+    def get_data(self, 
+                 standard: bool = True,
+                 additional_population_info: bool = False
+                 ) -> tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
+        """Get the transcript data from the gnomAD API.
+
+        Args:
+            standard: Flag indicating whether to process the data using the standard method. Defaults to True.
+            additional_population_info: Flag indicating whether to include additional population information in the
+                returned dataframes. Defaults to False.
+
+        Returns:
+            A tuple containing two dataframes. The first dataframe is the standard dataframe, and the second dataframe
+                is the clinical dataframe. If no data is found or if the gene_ens_id is not provided, both dataframes
+                will be None.
+        """
         json_data = self.get_json()
 
         if not json_data['data']['transcript']['variants']:
@@ -229,36 +278,60 @@ class TranscriptSearch(Search):
             self.dm.process_standard_dataframe()
             if additional_population_info:
                 return self.dm.get_additional_pop_info_df('standard'), self.dm.clinical_df
-            return self.dm.standard_df, self.dm.clinical_df
+            return self.dm.standard_df, self.dm.clinical_df  # TODO: investigate type-checking complaint
         
         else:
             if additional_population_info:
                 return self.dm.get_additional_pop_info_df('raw'), self.dm.clinical_df
             return self.dm.raw_df, self.dm.clinical_df
         
-    def get_json(self):
+    def get_json(self) -> dict[str, Any]:
+        """Get the JSON data from the gnomAD API.
+
+        Returns:
+            The response JSON from the gnomAD API request.
+        """
         variables = (self.dataset_id, self.transcript)
         return self.request_gnomad(variables)
     
 
 
-
 class VariantSearch(Search):
 
-    # variant_id: chromosome-position-original_nucleotide-variant
-    #    example: 4-1002747-G-A 
-    def __init__(self, dataset_version:int, variant_id: str):
+    def __init__(self, dataset_version: Union[str, int], variant_id: str):
+        """Constructor for the VariantSearch class.
+
+        Args:
+            dataset_version: The version of the gnomAD dataset to be used. It can be either 2, 3 or hg19/h38.
+            variant_id: The variant ID to search for. It should be in the format 
+             `chromosome-position-original_nucleotide-variant` (e.g. 4-1002747-G-A).
+        """
         from pynoma.Queries import variant_search, variant_search_variables
         super().__init__(dataset_version, variant_search, variant_search_variables)
         self.variant_id = variant_id
 
 
-    def get_json(self):
+    def get_json(self) -> dict[str, Any]:
+        """Get the JSON data from the gnomAD API.
+        
+            Returns:
+                The response JSON from the gnomAD API request.
+        """
         variables = (self.dataset_id, self.variant_id)
         return self.request_gnomad(variables)
 
 
-    def get_data(self, raw=False):
+    def get_data(self, raw: bool = False) -> tuple[Union[pd.DataFrame, dict, None], Union[pd.DataFrame, None]]:
+        """Get the variant data from the gnomAD API.
+
+        Args:
+            raw: If True, the raw JSON data will be returned. Defaults to False.
+
+        Returns:
+            A tuple containing two dataframes. The first dataframe is the standard dataframe, and the second dataframe
+                is the clinical dataframe. If no data is found or if the gene_ens_id is not provided, both dataframes
+                will be None. If raw is True, the (raw JSON, None) tuple will be returned instead of the dataframes.
+        """
         json_data = self.get_json()
         if not json_data['data']['variant']:
             Logger.variant_not_found(self.variant_id)
@@ -268,4 +341,4 @@ class VariantSearch(Search):
             return json_data, None
         else:
             self.dm = DataManager(json_data, self.dataset_id, variant_search=True)
-            return self.dm.standard_df, self.dm.variant_metadata
+            return self.dm.standard_df, self.dm.variant_metadata  # TODO: investigate type-checking complaint
