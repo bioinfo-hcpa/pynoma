@@ -1,6 +1,6 @@
 """This module contains the Search class, which is used to search the gnomAD database."""
 from time import sleep
-from typing import Any, Union
+from typing import Any, Union, Dict
 from requests import post
 import pandas as pd
 from pynoma.DataManager import DataManager
@@ -39,7 +39,7 @@ class Search:
                        variables: Union[str, tuple], 
                        retry_on_429: bool = True,
                        retry_sleep: int = 20
-                       ) -> dict[str, Any]:
+                       ) -> Dict[str, Any]:
         """Send a POST request to the gnomAD API.
 
         Args:
@@ -212,7 +212,7 @@ class GeneSearch(Search):
         self.end = gene_info['data']['gene']['stop']
         return
 
-    def get_json(self) -> dict[str, Any]:
+    def get_json(self) -> Dict[str, Any]:
         """Get the JSON data from the gnomAD API."""
         variables = (self.dataset_id, self.gene_ens_id)
         return self.request_gnomad(variables)
@@ -307,7 +307,7 @@ class TranscriptSearch(Search):
                 return self.dm.get_additional_pop_info_df('raw'), self.dm.clinical_df
             return self.dm.raw_df, self.dm.clinical_df
         
-    def get_json(self) -> dict[str, Any]:
+    def get_json(self) -> Dict[str, Any]:
         """Get the JSON data from the gnomAD API.
 
         Returns:
@@ -333,7 +333,7 @@ class VariantSearch(Search):
         self.variant_id = variant_id
 
 
-    def get_json(self) -> dict[str, Any]:
+    def get_json(self) -> Dict[str, Any]:
         """Get the JSON data from the gnomAD API.
         
             Returns:
