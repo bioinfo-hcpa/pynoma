@@ -1,6 +1,6 @@
 """This module contains the Search class, which is used to search the gnomAD database."""
 from time import sleep
-from typing import Any, Union, Dict
+from typing import Any, Union, Dict, Tuple
 from requests import post
 import pandas as pd
 from pynoma.DataManager import DataManager
@@ -134,7 +134,7 @@ class RegionSearch(Search):
     def get_data(self, 
                  standard=True, 
                  additional_population_info=False
-                 ) -> tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
+                 ) -> Tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
         """Get the region data from the gnomAD API.
 
         Args:
@@ -220,7 +220,7 @@ class GeneSearch(Search):
     def get_data(self, 
                  standard: bool = True,
                  additional_population_info: bool = False
-                 ) -> tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
+                 ) -> Tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
         """Get the gene data from the gnomAD API.
 
         This method retrieves data from the gnomAD API based on the provided gene_ens_id.
@@ -274,7 +274,7 @@ class TranscriptSearch(Search):
     def get_data(self, 
                  standard: bool = True,
                  additional_population_info: bool = False
-                 ) -> tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
+                 ) -> Tuple[Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
         """Get the transcript data from the gnomAD API.
 
         Args:
@@ -343,7 +343,7 @@ class VariantSearch(Search):
         return self.request_gnomad(variables)
 
 
-    def get_data(self, raw: bool = False) -> tuple[Union[pd.DataFrame, dict, None], Union[pd.DataFrame, None]]:
+    def get_data(self, raw: bool = False) -> Tuple[Union[pd.DataFrame, dict, None], Union[pd.DataFrame, None]]:
         """Get the variant data from the gnomAD API.
 
         Args:
